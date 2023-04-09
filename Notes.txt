@@ -1,0 +1,386 @@
+
+CRUD: https://www.youtube.com/watch?v=u8a25mQcMOI
+
+Actual course: https://www.youtube.com/watch?v=RrPxlESlTbI&list=PLhPyEFL5u-i0MHw41OapxjLlsl0s2XQyE&index=3
+
+thymeleaf: https://www.thymeleaf.org/
+
+############
+
+motivation: https://www.youtube.com/watch?v=1bx8PbZIxj8
+stop lying to yourself: https://www.youtube.com/watch?v=3uLDin9A9pc
+8 lessons men learn too late in life: https://www.youtube.com/watch?v=rvtY0GYk1wk
+think fast communication techniques: https://www.youtube.com/watch?v=HAnw168huqA
+
+#######
+statistics:
+conditional probability and independent events. https://saylordotorg.github.io/text_introductory-statistics/s07-03-conditional-probability-and-in.html
+backtesting py: https://www.youtube.com/watch?v=e4ytbIm2Xg0&list=PLnSVMZC68_e48lA4aRYL1yHYZ9nEq9AiH
+connect mt5: https://www.youtube.com/watch?v=zu2q28h9Uvc&list=PLNzr8RBV5nboxi7Hg3cv-CuTF2tO70r_P
+tamako love story: watch movie
+
+
+###############
+# topic 1-1
+
+spring initializr
+
+dependencies:
+spring web
+spring boot devtoolos
+thymeleaf
+
+let's create a basic html page:
+src/main/resources/static -> new html file
+
+#########################
+
+# Build a spring boot application maven project
+Maven: it is a dependency manager system, its used to compile and test your app.
+
+POM (project object module): The area called dependency contains all our libraries or dependencies.
+
+mvnrepository.com -> here you can search for libraries like graphs, forms, etc., it helps you to find
+possible version errors.
+
+#########################
+
+Creating a maven project - deploy:
+
+Using our previous project topic1-1. let's create the a new maven project that will execute our
+application, for this example, we are going to build a jar file.
+
+go to Run-> Edit Configurations
+in the left-top corner you will see a button with the "+" symbol, click on there.
+select maven.
+
+In the new window let's edit some spaces:
+name: Build Hello World
+Run: package // this section contains different commands as clean, test, etc, but for deployment is package
+Profiles: clean or whatever name you wish.
+Click on apply and ok.
+
+
+# Now let's go to pom.xml
+ in the section <build>
+ 
+ <build>
+	<finalName>helloworld</finalName> // this will be our output file
+ </build>
+ 
+// Now update the maven file.
+
+# In the top right corner you will find next to the hammer what file is actually being executed
+switch to Build Hello World. and run.
+
+the new output will be located in : src/main/target , and you will find helloworld.jar
+open the location using the cmd command and execute this line of code:
+java -jar helloworld.jar
+
+spring boot server will be running and if you visit in your browser localhost:8080, 
+you will see our page, notice that there is nothing being executed on intellij idea.
+
+
+####################
+nlayers: user1, user2 ->web server-> application server-> database server-> database 
+
+Layers: Layers organize code in relation to concerns. "YOu have one job"= code principle.
+
+Client layer: user1,user 2 - html and css. Here is where we do minimum data validation
+for example a form section or just show things to the user.
+
+Presentation layer (webserver): handlers, click handlers, scroll bar, whenever the user 
+makes an input, this layer will receive this data. ex: calendars or pick something from a list.
+
+Business layer: 
+	Busines logic example: complete a shopping cart checkout, calculate interest on a loan, generate a graph, 
+							in a chess game, the AI calculate the next moves.
+							
+Data Access Layer: implements the CRUD operations for persistence of business logic.
+this layer encapsulates and hides the data storage implementation from the upper layers.
+for example:
+we have a Data class with a method savePerson that receives an user1 object, this method
+execute a query in a database.
+
+Data.savePerson(user1) -> this message is short and people doesnt know what kind of commands are being executed.
+Sql.execute("insert name, password") into Users values (name,pw) -> this is wrong
+
+#################################
+
+topic2:
+
+@ComponentScan("com.springbootopic2.controllers") -> ComponentScan, scans all the objects in our root package, in this case
+com.springbootopic2.controllers. The componentScan must be located in ControllerApplication.java
+
+# Annotations: Annotations are classes used by springboot to perform some actions, ex of common annotations:
+@RestController
+@EnableAutoConfiguration
+
+@Controller : Spring will treat a class with the @Controller annotation as an MVC controller.
+@Controller is frequently used in combination with @RequestMapping annotation for request handling methods.
+It is used to request html, etc
+
+// this is our root package
+com{
+		// Children packages
+		myControllers // package where is HelloController.java
+		springboottopic2.controllers //package where is ControllerApplication.java
+	}
+
+
+// ControllerApplication.java
+
+@SpringBootApplication
+@ComponentScan("com.springbootopic2.controllers")
+public class ControllersApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ControllersApplication.class, args);
+	}
+
+}
+
+// HelloWorldController.java
+@Controller
+public class HelloWorldController {
+    // return a string from a /test1 url
+
+    @GetMapping("/test1")
+    @ResponseBody // send the respond back to the client, there is not test1 html
+    public String printHello(){
+        return "Hello Danny! Congrats you are learning a lot!";
+    }
+
+    @GetMapping("/test2")
+    public String showHelloPage(Model model){
+        //attributeName:"message" is the name of the variable given in our html-> th:text ="${message}"
+        //attributeValue: is the value that we will replace on our html, it will change from Hello Controllers Web Page to Have a great day!
+        model.addAttribute("message", "Have a great day!");
+        model.addAttribute("rating",99);
+        model.addAttribute("report","Some great news from the station");
+        return "helloPage";
+    }
+	
+	// Annoter way to write Model 
+    @GetMapping("/test3")
+    public ModelAndView printHelloAgain(){
+        ModelAndView mv = new ModelAndView();
+        mv.addObject("message","Have a super day");
+        mv.addObject("rating",55);
+        mv.setViewName("helloPage");
+        return mv;
+    }
+
+    @GetMapping("/test4")
+    public String showHelloPage4(@RequestParam("message") String message , Model model){
+       // model.addAttribute("message", "Have a great day!");
+        model.addAttribute("message",message); // we get the message from the url browser using the ?message=Danny
+        model.addAttribute("rating",99);
+        model.addAttribute("report","Some great news from the station");
+        return "helloPage";
+    }
+
+}
+
+Note: there are a few different uses of @RequestParam , try to check them: https://www.baeldung.com/spring-request-param
+
+
+// src/main/resources/templates
+
+//helloPage.html , using thymeleaf template
+
+<!DOCTYPE html>
+<html xmlns:th="https://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello Controllers</title>
+</head>
+<style>
+    * {
+        font-family:Arial,Helvetica,Sans-serif;
+    }
+
+    h1{
+        color:blue;
+    }
+
+    p{
+        font-style:italic;
+    }
+
+    .title_box{
+        border:2px solid #222;
+        border-radius:5px;
+        width:fit-content;
+        padding:0.5em;
+    }
+
+</style>
+<body>
+    <div class="title_box">
+        <h1 th:text ="${message}">Hello Controllers Web Page</h1>
+    </div>
+    <div>
+        <p>This is looking perfect!</p>
+    </div>
+    <div>
+        <h2>Latest News!!!</h2>
+        <p th:text="${report}">Nothing new yet...</p>
+        <p>Rating score: <span th:text="${rating}"></span> </p>
+
+    </div>
+
+
+
+</body>
+</html>
+
+#########################
+CREATE A DATA TABLE IN SPRING BOOT
+
+Using our previouse class HelloWorldController, let's add a new method.
+
+// HelloWorldController
+
+@Controller
+public class HelloWorldController {
+    // return a string from a /test1 url
+
+    @GetMapping("/test1")
+    @ResponseBody // send the respond back to the client, there is not test1 html
+    public String printHello(){
+        return "Hello Danny! Congrats you are learning a lot!";
+    }
+
+    @GetMapping("/test2")
+    public String showHelloPage(Model model){
+        //attributeName:"message" is the name of the variable given in our html-> th:text ="${message}"
+        //attributeValue: is the value that we will replace on our html, it will change from Hello Controllers Web Page to Have a great day!
+        model.addAttribute("message", "Have a great day!");
+        model.addAttribute("rating",99);
+        model.addAttribute("report","Some great news from the station");
+        return "helloPage";
+    }
+
+    @GetMapping("/test3")
+    public ModelAndView printHelloAgain(){
+        ModelAndView mv = new ModelAndView();
+        mv.addObject("message","Have a super day");
+        mv.addObject("rating",55);
+        mv.setViewName("helloPage");
+        return mv;
+    }
+
+    @GetMapping("/test4")
+    public String showHelloPage4(@RequestParam("message") String message , Model model){
+       // model.addAttribute("message", "Have a great day!");
+        model.addAttribute("message",message); // we get the message from the url browser using the ?message=Danny
+        model.addAttribute("rating",99);
+        model.addAttribute("report","Some great news from the station");
+        return "helloPage";
+    }
+
+    @GetMapping("/people")
+    public String showFriends(Model model){
+		
+		// Creating a list of friends
+        List<Person> friends = new ArrayList<Person>();
+
+        //Adding some friends
+        friends.add(new Person(0,"Danny",32,59.2f));
+        friends.add(new Person(1,"Sergio",26,70f));
+        friends.add(new Person(2,"Johana",32,51.2f));
+        friends.add(new Person(3,"Kudzai",22,80.3f));
+        friends.add(new Person(4,"Melania",20,49.5f));
+
+        System.out.println(friends);
+
+        // our attribute on thymleaf is called people and is binded to List of friends
+        model.addAttribute("people",friends);
+
+        return "printFriends";
+    }
+
+}
+
+# Now let's create a new package with the name of "myModels" and inside let's create a new class called "Person"
+Person will contain the attributes of id, name, age and weight, 
+let's create the basic getters , setters, toString and constructor. I dont think copy that section of the code
+never less if there is a new method added, I will paste it.
+
+# Creating printFriends.html . We are going to use https://www.layoutit.com/ to create a template using
+bootstrap 4, the html code is saved in src/main/resources/templates and the css and javascript
+they are saved in src/main/resources/static 
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>List of Friends</title>
+
+    <meta name="description" content="Source code generated using layoutit.com">
+    <meta name="author" content="LayoutIt!">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+  </head>
+  <body>
+
+    <div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			<h3>
+				These some are of my friends!!!.
+			</h3>
+			<table class="table table-sm table-hover table-striped">
+				<thead>
+					<tr>
+						<th>
+							id
+						</th>
+						<th>
+							Name
+						</th>
+						<th>
+							Age
+						</th>
+						<th>
+							Weight
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="p : ${people}">
+						<td th:text = "${p.id}">
+							NaN
+						</td>
+						<td th:text="${p.name}">
+							NaN
+						</td>
+						<td th:text="${p.age}">
+							NaN
+						</td>
+						<td th:text="${p.weight}">
+							NaN
+						</td>
+					</tr>
+
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/scripts.js"></script>
+  </body>
+</html>
+
+# That's all ! now let's create an short JSON api using the information of our List of friends.

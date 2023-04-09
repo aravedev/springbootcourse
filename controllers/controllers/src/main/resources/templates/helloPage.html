@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="https://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello Controllers</title>
+</head>
+<style>
+    * {
+        font-family:Arial,Helvetica,Sans-serif;
+    }
+
+    h1{
+        color:blue;
+    }
+
+    p{
+        font-style:italic;
+    }
+
+    .title_box{
+        border:2px solid #222;
+        border-radius:5px;
+        width:fit-content;
+        padding:0.5em;
+    }
+
+</style>
+<body>
+    <div class="title_box">
+        <h1 th:text ="${message}">Hello Controllers Web Page</h1>
+    </div>
+    <div>
+        <p>This is looking perfect!</p>
+    </div>
+    <div>
+        <h2>Latest News!!!</h2>
+        <p th:text="${report}">Nothing new yet...</p>
+        <p>Rating score: <span th:text="${rating}"></span> </p>
+
+    </div>
+
+
+
+</body>
+</html>
