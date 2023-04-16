@@ -438,3 +438,248 @@ th:text="*{userName}" = the "*" means that there is an object and the parameter 
 </dependency>
 
 <p class="alert alert-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password Error</p>
+
+#################################
+
+https://www.youtube.com/watch?v=88YwC5azM_Q&list=PLhPyEFL5u-i0MHw41OapxjLlsl0s2XQyE&index=11
+
+DEPENDENCY INJECTION
+
+The herarchy is the next:
+web page
+Controller
+SERVICES
+Business Service
+Data Service
+
+@Autowired -> means, find the service (business logic/class) that we need and invoking it using spring bood.
+
+Example of @Autowired:
+
+# Bad Code!
+
+@Controller
+@RequestMapping("/orders")
+Class OrdersController{
+	
+	OrderBusinessServiceInterface orderBS = new OrderBusinessServiceInterface()#here we are creating a dependency Wrong!
+	
+	public String showAllOrders(Model model){
+		List<OrderModel> orders = ordersBusinessService.getOrders();
+		model.addAttribute("orders",orders);
+		return "orders";
+	}
+} 
+
+Because we are creating a new object with "new OrderBusinessServiceInterface()" this cause dependency of one
+specific class, that could give use problems in the future, to avoid this, we use @Autowired.
+
+# Good Code!
+
+@Controller
+@RequestMapping("/orders")
+Class OrdersController{
+	
+	@Autowired
+	OrderBusinessServiceInterface orderBS #here we indicating to Spring that search the class and inject it!
+	
+	public String showAllOrders(Model model){
+		List<OrderModel> orders = ordersBusinessService.getOrders();
+		model.addAttribute("orders",orders);
+		return "orders";
+	}
+} 
+
+
+The magic of @Autowired is the following: suposse that our Controller contains multiple services layers,
+one for testing, one for clients, other for a specific Europe region, so, we can switch between them easyly.
+
+How the program determines which service must be applied?
+we identify one of the services as @Primary , thats will be the first to be called.
+
+
+########### Applying the learning  topic 3-3 #############
+
+Create a Model class called : OrderModel.java (parameters, constructor,getters and setters, toString)
+This mode must have a Controller : OrderController.java (website)
+
+Interface: is like design a promise, it means that another class will use this method.
+
+
+###############################################################
+
+Spring Bean LifeCycle:
+
+// SpringConfig.java
+
+
+@Configuration
+public class SpringConfig {
+
+
+	   @Bean(name="ordersBusinessService", initMethod="init", destroyMethod="destroy")
+			public OrderBusinessServiceInterface getOrdersBusiness(){
+			return new OrderBusinessService();
+		}
+}
+
+# initMethod and destroyMethod, are used o initialize a bean to create a connection with a database, or 
+calculations , or preferesense, and at the end clean up the information.
+
+// OrderBusinessService implements OrdersBusinessServiceInterface{
+
+	@Override
+	public void init(){
+		System.out.println("In the OrdersBusinessService.init()");
+	}
+	
+	@Override
+	public void destroy(){
+		System.out.println("In the OrdersBusinessService.destroy()");
+	}
+}
+
+# What is springBean Scope?
+This controls how long the bean is "alive". 
+For example, suposse you need to connect to a database, well, we will initiate the connection, 
+then use the DB for requesting data and get disconnected at the end.
+
+so, what is the Scope?
+You want your @Bean lives on:
+One page view?
+One valid login session?
+Lifetime of the app?
+
+SpringBean Scope Options:
+- singleton: This scopes the bean definition to a single instance per Spring IoC Container (default)
+- request: This scopes a bean definition to an HTTP request.
+- session: THis scipes a bean definition to a HTTP session.
+- global-session: This scopes a bean definition to a global HTTP session.
+- prototype: This scopes a single bean definition to have any number of object instances.
+
+# Set scope: singleton(default)
+
+@Configuration
+public class SpringConfig {
+
+
+	   @Bean(name="ordersBusinessService", initMethod="init", destroyMethod="destroy")
+			public OrderBusinessServiceInterface getOrdersBusiness(){
+			return new OrderBusinessService();
+		}
+}
+
+# Set scope: request - this is used for one html page
+@Bean(name="irdersBusinessService", initMethod="init", destroyMethod="destroy")
+@RequestScope
+public OrdersBusinessServiceInterface getOrdersBusiness(){
+	return new OrdersBusinessService();
+}
+
+# Set scope: session
+@Bean(name="ordersBusinessService", initMethod="init", destroyMethod="destroy")
+@Scope(value="prototype", proxyMode=ScopedProxyMode.TARGET_CLASS)
+@SessionScope
+public OrdersBusinessServiceInterface getOrdersBusiness(){
+	return new OrderBusinessService();
+}
+
+
+####
+
+# Creating 2 new methods: init() and destroy() in OrdersBusinessServiceInterface
+
+public interface OrdersBusinessServiceInterface {
+    public void test();
+
+    public List<OrderModel> getOrders();
+
+    public void init();
+
+    public void destroy();
+	
+	}
+
+# Now we have to implement these methods in OrderBusinessService and OrderBusinessService2
+
+// OrderBusinessService2
+
+public class OrderBusinessService2 implements  OrdersBusinessServiceInterface{
+
+    List<OrderModel> orders;
+
+    @Override
+    public void test() {
+        System.out.println("OrderBusinessService is working");
+    }
+
+    @Override
+    public List<OrderModel> getOrders() {
+
+        // generate some orders
+        // this version of the app will send a hard coded list of orders
+
+
+
+        orders.add(new OrderModel(0L,"AAA","Pizza Hut",15.0f,1));
+        orders.add(new OrderModel(1L,"AAB","Subway BBQ Ribs",16.2f,1));
+        orders.add(new OrderModel(2L,"AAC","Apple pie",5.0f,2));
+        orders.add(new OrderModel(2L,"AAC","Soft Drinks",5.0f,2));
+
+
+        return orders;
+    }
+	
+	// Notice that we are creating the orders list in the init() method, so, every time that we refresh our page
+	// the orders list will be created.
+    @Override
+    public void init() {
+        System.out.println("Init method of the Orders Business Service 2");
+        orders = new ArrayList<OrderModel>();
+    }
+	
+	// after being created using init() our bean is destroyed.
+    @Override
+    public void destroy() {
+        System.out.println("Destroy method of the Orders Business Service 2");
+    }
+}
+
+# Note: is the same configuration for OrderBusinessService
+
+# Applying @RequestScope in SpringConfig.
+
+@Configuration
+public class SpringConfig {
+
+
+    @Bean(name="ordersBusinessService" , initMethod = "init" , destroyMethod = "destroy") // init and destroy are in OrdersBusinessServiceInterface, they are methods
+    // returning an interface, if we use this process we must get rid of @Service annotation in both OrderBusinessService
+    @RequestScope // this means that our Bean is executed once and afther of that it is destroyed.
+    //@SessionScope // only works for the time the user has a session active, if we close the session or close the page, the bean is destroyed. Used for shopping cards
+    public OrdersBusinessServiceInterface getOrdersBusiness(){
+        return new OrderBusinessService2();
+    }
+}
+
+
+####################################################################
+
+Rest API;
+
+Rest API works like a second app, it is a library that can be used in other apps as 
+library feeds.
+
+@RestController is used also to indicate that we are going to make a RestAPI
+
+
+{
+        "id": 6,
+        "orderNo": "006",
+        "productName": "Nature experience in the Amazon",
+        "price": 1600.0,
+        "quantity": 3
+    }
+	
+Put = Used to update
+Post = Used to add.

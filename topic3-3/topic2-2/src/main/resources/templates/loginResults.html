@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+
+<html layout:decorate="layouts/defaultLayout">
+<head>
+  <meta charset="UTF-8">
+  <title>LoginResults</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body layout:fragment="content">
+    <div class="container" th:Object="${loginModel}">
+      <p>Username: <span th:text="*{userName}"></span></p>
+      <p>Password: <span th:text="*{password}"</p>
+    </div>
+</body>
+</html>
